@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// constantes
+// constants
 
 let initialState = {
   fetching: false,
@@ -17,9 +17,11 @@ let GET_CHARACTER_ERROR = "GET_CHARACTER_ERROR";
 export default function reducer(state = initialState, action) {
   switch (action.type) {
     case GET_CHARACTER:
+      return { ...state, array: action.payload, fetching: true };
     case GET_CHARACTER_SUCCESS:
-      return { ...state, array: action.payload };
+      return { ...state, array: action.payload, fetching: false };
     case GET_CHARACTER_ERROR:
+      return { ...state, error: action.payload, fetching: false };
     default:
       return state;
   }
@@ -27,11 +29,26 @@ export default function reducer(state = initialState, action) {
 
 //acciones (thunk - promises)
 export const getCharactersAction = () => (dispatch, getState) => {
-  // function that returns a funnction
-  return axios.get(URL).then((res) => {
-    dispatch({
-      type: GET_CHARACTER_SUCCESS,
-      payload: res.data.results,
-    });
+  dispatch({
+    type: GET_CHARACTER,
   });
+  // function that returns a funnction
+  return axios
+    .get(URL)
+    .then((res) => {
+      // despacho la acción que consigue chars exitosamente
+      // y se los guarda en el payload
+      dispatch({
+        type: GET_CHARACTER_SUCCESS,
+        payload: res.data.results,
+      });
+    })
+    .catch((err) => {
+      console.log("err");
+      console.log(err);
+      dispatch({
+        type: GET_CHARACTER_ERROR,
+        payload: err.response.message,
+      });
+    });
 };

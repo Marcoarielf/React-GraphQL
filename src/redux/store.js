@@ -15,6 +15,7 @@ export default function generateStore() {
     rootReducer,
     composeEnhancers(applyMiddleware(thunk))
   );
+  // esto corre cuando la aplicación inicia.
   getCharactersAction()(store.dispatch, store.getSate);
   return store;
 }
