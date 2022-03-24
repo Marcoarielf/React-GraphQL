@@ -1,5 +1,7 @@
 import { initializeApp } from "firebase/app";
 import "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 let firebaseConfig = {
@@ -12,6 +14,18 @@ let firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const db = getFirestore();
+
+export async function updateDB(array, uid) {
+  try {
+    const docRef = await addDoc(collection(db, "favs"), {
+      array,
+    });
+    console.log("Document written with ID: ", docRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+}
 
 export function logginWithGoogle() {
   let provider = new app.auth.GoogleAuthProvider();

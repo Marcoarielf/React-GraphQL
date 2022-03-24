@@ -1,4 +1,5 @@
 import axios from "axios";
+import { updateDB } from "../firebase";
 
 // constants
 
@@ -6,12 +7,14 @@ let initialState = {
   fetching: false,
   array: [],
   currentChar: {},
+  favorites: [],
 };
 let URL = "https://rickandmortyapi.com/api/character";
 let GET_CHARACTER = "GET_CHARACTER";
 let GET_CHARACTER_SUCCESS = "GET_CHARACTER_SUCCESS";
 let GET_CHARACTER_ERROR = "GET_CHARACTER_ERROR";
 let REMOVE_CHARACTER = "REMOVE_CHARACTER";
+let LIKE_CHARACTER = "LIKE_CHARACTER";
 
 // reducer: va a estar escuchando que hagas una acción
 // Al hacer la acción la ejecuta y cambia el state.
@@ -25,12 +28,26 @@ export default function reducer(state = initialState, action) {
       return { ...state, error: action.payload, fetching: false };
     case REMOVE_CHARACTER:
       return { ...state, array: action.payload };
+    case LIKE_CHARACTER:
+      return { ...state, ...action.payload }; // ...action.payload = array=[] and favorites=[]
     default:
       return state;
   }
 }
 
 //acciones (thunk - promises)
+export const likeCharacterAction = () => (dispatch, getState) => {
+  let { array, favorites } = getState().characters;
+  const { uid } = getState().user;
+  const charLiked = array.shift();
+  favorites.push(charLiked);
+  array.shift();
+  updateDB(favorites, uid);
+  dispatch({
+    type: LIKE_CHARACTER,
+    payload: { array: [...array], favorites: [...favorites] },
+  });
+};
 
 export const removeCharacterAction = () => (dispatch, getState) => {
   let { array } = getState().characters;
